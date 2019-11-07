@@ -1,9 +1,13 @@
 package com.example.demo.user;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,23 +25,23 @@ public class UserResource {
     private UserDaoService service;
 
     @GetMapping("/users")
-    public List<User> retrieveAllUsers() {
-        return service.findAll();
+    public MappingJacksonValue retrieveAllUsers() {
+        List<User> list = service.findAll();
+        return filteredResponse(list, "name", "id");
     }
 
     @GetMapping("/users/{id}")
-    public Resource<User> retrieveUser(@PathVariable int id) {
+    public MappingJacksonValue retrieveUser(@PathVariable int id) {
         User user = service.findOne(id);
         if (user == null) {
             throw new UserNotFoundException("id-" + id);
         }
-
         Resource<User> entity = new Resource<>(user);
 
         ControllerLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
         entity.add(linkTo.withRel("all-users"));
 
-        return entity;
+        return filteredResponse(entity, "name", "id", "birthDate");
     }
 
     @PostMapping("/users")
@@ -60,6 +64,16 @@ public class UserResource {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    private MappingJacksonValue filteredResponse(Object entity, String... fields) {
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept(fields);
+
+        FilterProvider filters = new SimpleFilterProvider().addFilter("GetUserFilter", filter);
+        MappingJacksonValue mapping = new MappingJacksonValue(entity);
+        mapping.setFilters(filters);
+
+        return mapping;
     }
 
 }

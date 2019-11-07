@@ -1,9 +1,16 @@
 package com.example.demo.user;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+@ApiModel(description = "User details")
+@JsonFilter("GetUserFilter")
 public class User {
     private Integer id;
 
@@ -11,6 +18,7 @@ public class User {
     private String name;
 
     @Past
+    @ApiModelProperty(notes = "Birthdate should be in the past")
     private Date birthDate;
 
     protected User() {}
