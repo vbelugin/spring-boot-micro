@@ -1,0 +1,7 @@
+insert into user values(1, sysdate(), 'AB')
+insert into user values(2, sysdate(), 'Bob')
+insert into user values(3, sysdate(), 'Jack')
+insert into post values(1, 'Some description', 1)
+insert into post values(2, 'Some description', 1)
+insert into post values(3, 'Some description', 1)
+insert into post values(4, 'Some description', 1)
