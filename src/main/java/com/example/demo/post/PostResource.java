@@ -26,13 +26,13 @@ public class PostResource {
     @Autowired
     private PostRepository postRepository;
 
-    @GetMapping("/jpa/posts")
+    @GetMapping("/posts")
     public MappingJacksonValue retrieveAllUsers() {
         List<Post> list = postRepository.findAll();
         return filteredResponse(list);
     }
 
-    @GetMapping("/jpa/posts/{id}")
+    @GetMapping("/posts/{id}")
     public MappingJacksonValue retrieveUser(@PathVariable int id) {
         Optional<Post> post = postRepository.findById(id);
         if (!post.isPresent()) {
@@ -46,7 +46,7 @@ public class PostResource {
         return filteredResponse(entity);
     }
 
-    @PostMapping("/jpa/posts")
+    @PostMapping("/posts")
     public ResponseEntity<Object> createUser(@Valid @RequestBody Post post) {
         Post savedPost = postRepository.save(post);
         URI location = ServletUriComponentsBuilder
@@ -58,7 +58,7 @@ public class PostResource {
         return ResponseEntity.created(location).build();
     }
 
-    @DeleteMapping("/jpa/posts/{id}")
+    @DeleteMapping("/posts/{id}")
     public void deleteUser(@PathVariable int id) {
         postRepository.deleteById(id);
     }

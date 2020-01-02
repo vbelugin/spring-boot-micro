@@ -1,5 +1,7 @@
 package com.example.demo.user;
 
+import com.example.demo.post.Post;
+import com.example.demo.post.PostRepository;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -24,6 +26,9 @@ public class UserJPAResource {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping("/jpa/users")
     public MappingJacksonValue retrieveAllUsers() {
@@ -70,6 +75,35 @@ public class UserJPAResource {
         mapping.setFilters(filters);
 
         return mapping;
+    }
+
+    @GetMapping("/jpa/users/{id}/posts")
+    public List<Post> retrieveAllPostsForUser(@PathVariable int id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (!user.isPresent()) {
+            throw new UserNotFoundException("id-" + id);
+        }
+        return user.get().getPosts();
+    }
+
+    @PostMapping("/jpa/users/{id}/posts")
+    public ResponseEntity<Object> createPost(@PathVariable int id, @Valid Post post) {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (!userOptional.isPresent()) {
+            throw new UserNotFoundException("id-" + id);
+        }
+
+        User user = userOptional.get();
+        post.setUser(user);
+        postRepository.save(post);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(post.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
     }
 
 }

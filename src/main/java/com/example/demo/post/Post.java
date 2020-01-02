@@ -1,20 +1,24 @@
 package com.example.demo.post;
 
 import com.example.demo.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
-@JsonIgnoreProperties(value = "user")
 public class Post {
 
     @Id
     @GeneratedValue
     private Integer id;
+
+    @Size(min=2, message = "Description should have at least 2 characters")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private User user;
 
     public Integer getId() {
